@@ -7,9 +7,12 @@
 template <typename Tkey, typename Tval>
 class orderMap : public TMap<Tkey, Tval>
 {
-    using Node = typename Tmap<Tkey, Tval>::Node
+    using Node = typename Tmap<Tkey, Tval>::Node;
+    std::vector<Node *> a;
+    size_t size;     // фактическое количество занятых
+    size_t capacity; // размер массива
 
-        int binsearch(const Tkey &k)
+    int binsearch(const Tkey &k)
     {
         int left = 0;
         int right = a.size() - 1;
@@ -51,6 +54,7 @@ class orderMap : public TMap<Tkey, Tval>
     }
 
 public:
+    orderMap(vector<Node *> a) {}; // реализую
     orderMap()
     {
         n = 0;
@@ -96,7 +100,7 @@ public:
         }
         return true;
     }
-    virtual Node search(const Tkey &key) override
+    virtual Tval search_elem(const Tkey &key) override
     {
         if (binsearch(k) == -1)
         {
@@ -104,7 +108,7 @@ public:
         }
         else
         {
-            return a[binsearch(k)];
+            return a[binsearch(k)].val;
         }
     }
     virtual void Remove(const Tkey &k) override
@@ -118,6 +122,15 @@ public:
             a.erase(a.begin() + binsearch(k));
             n = n - 1;
         }
+    }
+    virtual void Remove(size_t pos) override
+    {
+        if (pos > n)
+        {
+            throw("Index out of range");
+        }
+        a.erase(a.begin() + pos);
+        n = n - 1;
     }
     virtual Node Pop(const Tkey &k) override
     {
