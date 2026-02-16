@@ -7,8 +7,8 @@
 template <typename Tkey, typename Tval>
 class orderMap : public TMap<Tkey, Tval>
 {
-    using Node = typename Tmap<Tkey, Tval>::Node;
-    std::vector<Node *> a;
+    using pair = typename Tmap<Tkey, Tval>::pair;
+    std::vector<pair *> a;
     size_t size;     // фактическое количество занятых
     size_t capacity; // размер массива
 
@@ -54,7 +54,6 @@ class orderMap : public TMap<Tkey, Tval>
     }
 
 public:
-    orderMap(vector<Node *> a) {}; // реализую
     orderMap()
     {
         n = 0;
@@ -71,7 +70,7 @@ public:
         {
             a.resize();
         }
-        Node *b = new Node(k, b, nullptr);
+        pair *b = new pair(k, b);
 
         int true_ind = findinsertplace(k);
         a.insert(a.begin() + true_ind, b);
@@ -83,7 +82,7 @@ public:
         a.reserve(newcapacity);
         capacity = newcapacity;
     }
-    orderMap(vector<Node *> b)
+    orderMap(vector<pair *> b)
     {
         capacity = b.size();
         n = b.size();
@@ -132,13 +131,13 @@ public:
         a.erase(a.begin() + pos);
         n = n - 1;
     }
-    virtual Node Pop(const Tkey &k) override
+    virtual pair Pop(const Tkey &k) override
     {
         if (binsearch(k) == -1)
         {
             throw runtime_error("cannot find key");
         }
-        Node *b = new Node(a[binsearch(k)]->key, a[binsearch(k)]->val, nullptr);
+        pair *b = new pair(a[binsearch(k)]->key, a[binsearch(k)]->val);
         a.erase(a.begin() + binsearch(k));
         n = n - 1;
         return b;

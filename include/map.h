@@ -8,6 +8,7 @@ class TMap
     {
         Tkey key;
         Tval val;
+        pair(const Tkey &k, const Tval &v) : key(k), val(v);
     };
 
 public:

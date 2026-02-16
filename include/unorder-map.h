@@ -4,7 +4,8 @@
 template <typename Tkey, typename Tval>
 class unorderMap : public Tmap<Tkey, Tval>
 {
-    using typename Tmap<Tkey, Tval>::pair;
+    using pair = typename Tmap<Tkey, Tval>::pair;
+    struct Node
     {
         pair<Tkey, Tval> a;
         Node *next;
@@ -43,6 +44,7 @@ public:
     }
     unorderMap(vector<Node *> a)
     { // тут хз, предпологаем что внутри вектора a,ноды выстроенны в нужно порядке
+      //P.S перечитал верхний комментарий, хз о чем я 
         head = a[0];
         n = size(a);
     }
