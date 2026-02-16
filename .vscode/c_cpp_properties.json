@@ -10,6 +10,7 @@
             ],
             "defines": [],
             "cStandard": "c17",
+            "compilerPath": "/usr/bin/g++",
             "cppStandard": "gnu++17",
             "intelliSenseMode": "linux-gcc-x64"
         }

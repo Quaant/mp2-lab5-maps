@@ -14,13 +14,14 @@ class unorderMap : public Tmap<Tkey, Tval>
     };
 
     Node *head;
+    size_t n;
 
     bool check(const Tkey &k)
     { // проверка на уникальность ключа
         Node *tmp = head;
         for (int i = 0; i < n; i++)
         {
-            if (tmp->key == k)
+            if (tmp->a.key == k)
             {
                 return true;
             }
@@ -34,17 +35,18 @@ public:
     {
         return head;
     }
+    
     unorderMap()
     {
-        head->Tkey = 0;
-        head->Tval = 0;
+        head->a.key = 0;
+        head->a.val = 0;
         head->next = nullptr;
         n = 0;
         capacity = 0;
     }
     unorderMap(vector<Node *> a)
     { // тут хз, предпологаем что внутри вектора a,ноды выстроенны в нужно порядке
-      //P.S перечитал верхний комментарий, хз о чем я 
+      // P.S перечитал верхний комментарий, хз о чем я
         head = a[0];
         n = size(a);
     }
@@ -57,9 +59,9 @@ public:
         Node *tmp = head;
         for (int i = 0; i < n; i++)
         {
-            if (tmp->Tkey == k)
+            if (tmp->a.key == k)
             {
-                return tmp->val;
+                return tmp->a.val;
             }
         }
         throw runtime_error("cannot find key");
@@ -72,8 +74,8 @@ public:
         {
             throw("u have already k in list")
         }
-        Node *b = new Node(head->key, head->val, head->next);
-        head = new Node(b->key, b->val, b->next);
+        Node *b = new Node(head->a.key, head->a.val, head->next);
+        head = new Node(b->a.key, b->a.val, b->next);
         n++;
     }
     void push_after(size_t pos, const Tkey &k, const Tval &v)
@@ -83,7 +85,7 @@ public:
             throw("u have already k in list")
         }
         Node *tmp = head;
-        Node *b = new Node(k, val, nullptr) for (int i = 0; i < pos && tmp != nullptr; i++)
+        Node *b = new Node(k, v, nullptr) for (int i = 0; i < pos && tmp != nullptr; i++)
         {
             tmp = tmp->next;
         }
