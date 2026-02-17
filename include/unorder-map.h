@@ -1,16 +1,18 @@
+#ifndef UNORDER_MAP_H
+#define UNORDER_MAP_H
 #pragma once
 #include "map.h"
 
 template <typename Tkey, typename Tval>
-class unorderMap : public Tmap<Tkey, Tval>
+class unorderMap : public TMap<Tkey, Tval>
 {
-    using pair = typename Tmap<Tkey, Tval>::pair;
+    using pair = typename TMap<Tkey, Tval>::pair;
     struct Node
     {
-        pair<Tkey, Tval> data;
+        pair data;
         Node *next;
-        Node(const Tkey &k, const Tval &v, Node *n) : key(k), val(v), next(n);
-        Node(const Tkey &k, const Tval &v) : key(k), val(v), next(nullptr);
+        Node(const Tkey &k, const Tval &v, Node *n) : data(k, v), next(n) {}
+        Node(const Tkey &k, const Tval &v) : data(k, v), next(nullptr) {}
     };
 
     Node *head;
@@ -31,20 +33,19 @@ class unorderMap : public Tmap<Tkey, Tval>
     }
 
 public:
-    Node head()
+    Node GetHead()
     {
         return head;
     }
-    
+
     unorderMap()
     {
         head->data.key = 0;
         head->data.val = 0;
         head->next = nullptr;
         n = 0;
-        capacity = 0;
     }
-    unorderMap(vector<Node *> a)
+    unorderMap(std::vector<Node *> a)
     { // тут хз, предпологаем что внутри вектора a,ноды выстроенны в нужно порядке
       // P.S перечитал верхний комментарий, хз о чем я
         head = a[0];
@@ -64,7 +65,7 @@ public:
                 return tmp->data.val;
             }
         }
-        throw runtime_error("cannot find key");
+        throw("cannot find key");
     }
     // Вместо простого  INSERT я хочу добавибь push_front and push_back
 
@@ -72,7 +73,7 @@ public:
     {
         if (check(k) == true)
         {
-            throw("u have already k in list")
+            throw("u have already k in list");
         }
         Node *b = new Node(head->data.key, head->data.val, head->next);
         head = new Node(b->data.key, b->data.val, b->next);
@@ -82,17 +83,17 @@ public:
     {
         if (check(k) == true)
         {
-            throw("u have already k in list")
+            throw("u have already k in list");
         }
         Node *tmp = head;
         Node *b = new Node(k, v, nullptr);
-         for (int i = 0; i < pos && tmp != nullptr; i++)
+        for (int i = 0; i < pos && tmp != nullptr; i++)
         {
             tmp = tmp->next;
         }
         if (tmp == nullptr)
         {
-            throw out_of_range("Index out of range");
+            throw("Index out of range");
         }
         Node *c = tmp->next;
         tmp->next = b;
@@ -108,7 +109,7 @@ public:
         }
         if (tmp == nullptr)
         {
-            throw out_of_range("Index out of range");
+            throw("Index out of range");
         }
         return tmp->data.val;
     }
@@ -128,7 +129,7 @@ public:
         }
         if (tmp == nullptr)
         {
-            throw out_of_range("Index out of range");
+            throw("Index out of range");
         }
         if (tmp->next != nullptr)
             prev->next = tmp->next;
@@ -206,7 +207,7 @@ public:
         }
         if (tmp == nullptr)
         {
-            throw out_of_range("Index out of range");
+            throw("Index out of range");
         }
         if (tmp->next != nullptr)
             prev->next = tmp->next;
@@ -217,3 +218,5 @@ public:
         return tmp;
     }
 };
+
+#endif 

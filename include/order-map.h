@@ -1,5 +1,9 @@
+#ifndef ORDER_MAP_H
+#define ORDER_MAP_H
+
 #pragma once
 #include "map.h"
+#include <stdexcept>
 
 // capacity - размер массива
 // n - количество занятых ячеек
@@ -7,11 +11,12 @@
 template <typename Tkey, typename Tval>
 class orderMap : public TMap<Tkey, Tval>
 {
-    using pair = typename Tmap<Tkey, Tval>::pair;
+    using pair = typename TMap<Tkey, Tval>::pair;
     std::vector<pair *> a;
     size_t size;     // фактическое количество занятых
     size_t capacity; // размер массива
 
+public:
     int binsearch(const Tkey &k)
     {
         int left = 0;
@@ -38,9 +43,9 @@ class orderMap : public TMap<Tkey, Tval>
     {
         int left = 0;
         int right = a.size() - 1;
-        while (l <= r)
+        while (left <= right)
         {
-            middle = left + (right - left) / 2;
+            int middle = left + (right - left) / 2;
             if (a[middle]->key < k)
             {
                 left = middle + 1;
@@ -52,29 +57,27 @@ class orderMap : public TMap<Tkey, Tval>
         }
         return left;
     }
-
-public:
     orderMap()
     {
-        n = 0;
+        size = 0;
         capacity = 0;
     }
     virtual void Insert(const Tkey &k, const Tval &v) override
     {
         int ind = binsearch(k);
-        if (ind == 0)
+        if (ind == -1)
         {
-            throw runtime_error("cannot find place for insert in vector")
+            throw("cannot find place for insert in vector");
         }
-        if (n == capacity)
+        if (size == capacity)
         {
             a.resize();
         }
-        pair *b = new pair(k, b);
+        pair *b = new pair(k, v);
 
         int true_ind = findinsertplace(k);
         a.insert(a.begin() + true_ind, b);
-        n = a.size();
+        size = a.size();
     }
     virtual void resize() override
     {
@@ -82,16 +85,16 @@ public:
         a.reserve(newcapacity);
         capacity = newcapacity;
     }
-    orderMap(vector<pair *> b)
+    orderMap(std::vector<pair *> b)
     {
         capacity = b.size();
-        n = b.size();
+        size = b.size();
         for (int i = 0; i < b.size(); i++)
         {
             a.Insert(b[i]);
         }
     }
-    virtual bool search(const Tkey &key) override
+    virtual bool search(const Tkey &k) override
     {
         if (binsearch(k) == -1)
         {
@@ -99,61 +102,64 @@ public:
         }
         return true;
     }
-    virtual Tval search_elem(const Tkey &key) override
+    virtual Tval search_elem(const Tkey &k) override
     {
-        if (binsearch(k) == -1)
+        int index = binsearch(k);
+        if (index == -1)
         {
-            throw runtime_error("cannot find key in order map")
+            throw("cannot find key in order map");
         }
         else
         {
-            return a[binsearch(k)].val;
+            return a[index].val;
         }
     }
     virtual void Remove(const Tkey &k) override
     {
         if (binsearch(k) == -1)
         {
-            throw runtime_error("cannot find key");
+            throw("cannot find key");
         }
         else
         {
             a.erase(a.begin() + binsearch(k));
-            n = n - 1;
+            size = size - 1;
         }
     }
     virtual void Remove(size_t pos) override
     {
-        if (pos > n)
+        if (pos > size)
         {
             throw("Index out of range");
         }
         a.erase(a.begin() + pos);
-        n = n - 1;
+        size = size - 1;
     }
     virtual pair Pop(const Tkey &k) override
     {
         if (binsearch(k) == -1)
         {
-            throw runtime_error("cannot find key");
+            throw("cannot find key");
         }
         pair *b = new pair(a[binsearch(k)]->key, a[binsearch(k)]->val);
         a.erase(a.begin() + binsearch(k));
-        n = n - 1;
+        size = size - 1;
         return b;
     }
-    ostream &operator<<(ostream &out, orderMap<Tkey, Tval> &l)
-    {
-        out << "[";
-        for (int i = 0; i < l.size; i++)
-        {
-            out << "{" << l.data[i]->key << ": " << l.a[i]->val << "}";
-            if (i < size - 1)
-            {
-                out << ", ";
-            }
-        }
-        out << "]";
-        return out;
-    };
+    // ostream &operator<<(ostream &out, orderMap<Tkey, Tval> &l)
+    // {
+    //     out << "[";
+    //     for (int i = 0; i < l.size; i++)
+    //     {
+    //         out << "{" << l.data[i]->key << ": " << l.a[i]->val << "}";
+    //         if (i < size - 1)
+    //         {
+    //             out << ", ";
+    //         }
+    //     }
+    //     out << "]";
+    //     return out;
+    // };
 };
+
+#endif
