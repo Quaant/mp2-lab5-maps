@@ -21,18 +21,5 @@ public:
     virtual void Remove(const Tkey &key);
     virtual void Remove(size_t pos); // дописать в ordermap
     virtual void resize();           // если массив заполнился, то перевыделяем память, в стд векторе в 2 раза увеличивается, мы будем делать мб в 1.5 раза
-    ostream &operator<<(ostream &out, Tmap<Tkey, Tval> &l)
-    {
-        out << "[";
-        for (int i = 0; i < l.size(); i++)
-        {
-            out << "{" << l.a[i]->key << ": " << l.a[i]->val << "}";
-            if (i < size - 1)
-            {
-                out << ", ";
-            }
-        }
-        out << "]";
-        return out;
-    };
+    
 };

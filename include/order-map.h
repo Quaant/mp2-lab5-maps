@@ -142,4 +142,18 @@ public:
         n = n - 1;
         return b;
     }
+    ostream &operator<<(ostream &out, orderMap<Tkey, Tval> &l)
+    {
+        out << "[";
+        for (int i = 0; i < l.size; i++)
+        {
+            out << "{" << l.data[i]->key << ": " << l.a[i]->val << "}";
+            if (i < size - 1)
+            {
+                out << ", ";
+            }
+        }
+        out << "]";
+        return out;
+    };
 };

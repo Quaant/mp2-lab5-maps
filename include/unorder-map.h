@@ -7,7 +7,7 @@ class unorderMap : public Tmap<Tkey, Tval>
     using pair = typename Tmap<Tkey, Tval>::pair;
     struct Node
     {
-        pair<Tkey, Tval> a;
+        pair<Tkey, Tval> data;
         Node *next;
         Node(const Tkey &k, const Tval &v, Node *n) : key(k), val(v), next(n);
         Node(const Tkey &k, const Tval &v) : key(k), val(v), next(nullptr);
@@ -21,7 +21,7 @@ class unorderMap : public Tmap<Tkey, Tval>
         Node *tmp = head;
         for (int i = 0; i < n; i++)
         {
-            if (tmp->a.key == k)
+            if (tmp->data.key == k)
             {
                 return true;
             }
@@ -38,8 +38,8 @@ public:
     
     unorderMap()
     {
-        head->a.key = 0;
-        head->a.val = 0;
+        head->data.key = 0;
+        head->data.val = 0;
         head->next = nullptr;
         n = 0;
         capacity = 0;
@@ -59,9 +59,9 @@ public:
         Node *tmp = head;
         for (int i = 0; i < n; i++)
         {
-            if (tmp->a.key == k)
+            if (tmp->data.key == k)
             {
-                return tmp->a.val;
+                return tmp->data.val;
             }
         }
         throw runtime_error("cannot find key");
@@ -74,8 +74,8 @@ public:
         {
             throw("u have already k in list")
         }
-        Node *b = new Node(head->a.key, head->a.val, head->next);
-        head = new Node(b->a.key, b->a.val, b->next);
+        Node *b = new Node(head->data.key, head->data.val, head->next);
+        head = new Node(b->data.key, b->data.val, b->next);
         n++;
     }
     void push_after(size_t pos, const Tkey &k, const Tval &v)
@@ -85,7 +85,8 @@ public:
             throw("u have already k in list")
         }
         Node *tmp = head;
-        Node *b = new Node(k, v, nullptr) for (int i = 0; i < pos && tmp != nullptr; i++)
+        Node *b = new Node(k, v, nullptr);
+         for (int i = 0; i < pos && tmp != nullptr; i++)
         {
             tmp = tmp->next;
         }
@@ -109,7 +110,7 @@ public:
         {
             throw out_of_range("Index out of range");
         }
-        return tmp->val;
+        return tmp->data.val;
     }
     // удаления буду делать по индексу, по ключу,
     virtual void Remove(size_t pos) override
