@@ -1,0 +1,12 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/Users/egorz/source/repos/mp2-lab5-maps/build/cmake_install.cmake",
+		"C:/Users/egorz/source/repos/mp2-lab5-maps/build/googletest/cmake_install.cmake",
+		"C:/Users/egorz/source/repos/mp2-lab5-maps/build/googletest/googlemock/cmake_install.cmake",
+		"C:/Users/egorz/source/repos/mp2-lab5-maps/build/googletest/googletest/cmake_install.cmake",
+		"C:/Users/egorz/source/repos/mp2-lab5-maps/build/src/cmake_install.cmake",
+		"C:/Users/egorz/source/repos/mp2-lab5-maps/build/test/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
