@@ -5,7 +5,6 @@
 #include "map.h"
 #include <stdexcept>
 
-// capacity - размер массива
 // n - количество занятых ячеек
 
 template <typename Tkey, typename Tval>
@@ -13,20 +12,25 @@ class orderMap : public TMap<Tkey, Tval>
 {
     using pair = typename TMap<Tkey, Tval>::pair;
     std::vector<pair *> a;
-    size_t size;     // фактическое количество занятых
-    size_t capacity; // размер массива
+    size_t size; // фактическое количество занятых
 
 public:
     int binsearch(const Tkey &k)
     {
+        if (size == 0)
+        {
+            return -1;
+        }
+
         int left = 0;
         int right = a.size() - 1;
+
         while (left <= right)
         {
             int middle = left + (right - left) / 2;
-            if (a[middle]->key > k)
+            if (a[middle]->key == k)
             {
-                right = middle - 1;
+                return middle;
             }
             else if (a[middle]->key < k)
             {
@@ -34,10 +38,11 @@ public:
             }
             else
             {
-                return middle;
+                right = middle - 1;
             }
         }
-        return -1;
+
+        return -left - 1;
     }
     int findinsertplace(const Tkey &k)
     {
@@ -57,66 +62,69 @@ public:
         }
         return left;
     }
+    bool check_unique(const Tkey &k)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            if (a[i]->key == k)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
     orderMap()
     {
         size = 0;
-        capacity = 0;
     }
-    virtual void Insert(const Tkey &k, const Tval &v) override
+    void insert(const Tkey &k, const Tval &v) override
     {
         int ind = binsearch(k);
-        if (ind == -1)
-        {
-            throw("cannot find place for insert in vector");
-        }
-        if (size == capacity)
-        {
-            a.resize();
-        }
-        pair *b = new pair(k, v);
 
-        int true_ind = findinsertplace(k);
-        a.insert(a.begin() + true_ind, b);
+        if (ind >= 0)
+        {
+            // ключ существует - бросаем исключение
+            throw("Key already in vector a");
+        }
+
+        // ключа нет - вставляем новый
+        int insertPos = -ind - 1;
+        pair *b = new pair(k, v);
+        a.insert(a.begin() + insertPos, b);
         size = a.size();
     }
-    virtual void resize() override
-    {
-        size_t newcapacity = capacity * 1.5 + 1;
-        a.reserve(newcapacity);
-        capacity = newcapacity;
-    }
+
     orderMap(std::vector<pair *> b)
     {
-        capacity = b.size();
         size = b.size();
         for (int i = 0; i < b.size(); i++)
         {
-            a.Insert(b[i]);
+            a.insert(b[i]);
         }
     }
-    virtual bool search(const Tkey &k) override
+    bool search(const Tkey &k) override
     {
-        if (binsearch(k) == -1)
+        if (binsearch(k) < 0)
         {
             return false;
         }
         return true;
     }
-    virtual Tval search_elem(const Tkey &k) override
+    Tval search_elem(const Tkey &k) override
     {
         int index = binsearch(k);
-        if (index == -1)
+        if (index < 0)
         {
             throw("cannot find key in order map");
         }
         else
         {
-            return a[index].val;
+            return a[index]->val;
         }
     }
-    virtual void Remove(const Tkey &k) override
+    void remove(const Tkey &k) override
     {
-        if (binsearch(k) == -1)
+        if (binsearch(k) < 0)
         {
             throw("cannot find key");
         }
@@ -126,7 +134,7 @@ public:
             size = size - 1;
         }
     }
-    virtual void Remove(size_t pos) override
+    void remove(size_t pos) override
     {
         if (pos > size)
         {
@@ -135,31 +143,42 @@ public:
         a.erase(a.begin() + pos);
         size = size - 1;
     }
-    virtual pair Pop(const Tkey &k) override
+    pair pop(const Tkey &k) override
     {
-        if (binsearch(k) == -1)
+        if (binsearch(k) < 0)
         {
             throw("cannot find key");
         }
         pair *b = new pair(a[binsearch(k)]->key, a[binsearch(k)]->val);
         a.erase(a.begin() + binsearch(k));
         size = size - 1;
-        return b;
+        return *b;
     }
-    // ostream &operator<<(ostream &out, orderMap<Tkey, Tval> &l)
-    // {
-    //     out << "[";
-    //     for (int i = 0; i < l.size; i++)
-    //     {
-    //         out << "{" << l.data[i]->key << ": " << l.a[i]->val << "}";
-    //         if (i < size - 1)
-    //         {
-    //             out << ", ";
-    //         }
-    //     }
-    //     out << "]";
-    //     return out;
-    // };
+
+    void print()
+    {
+        std::cout << "[";
+        for (int i = 0; i < size; i++)
+        {
+            std::cout << "{" << a[i]->key << ": " << a[i]->val << "}";
+            if (i < size - 1)
+            {
+                std::cout << ", ";
+            }
+        }
+        std::cout << "]" << std::endl;
+    }
+    pair &operator[](const size_t pos)
+    {
+        return *a[pos];
+    }
+    ~orderMap()
+    {
+        for (auto ptr : a)
+        {
+            delete ptr;
+        }
+    }
 };
 
 #endif

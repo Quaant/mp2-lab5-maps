@@ -18,13 +18,11 @@ protected:
 public:
     virtual bool search(const Tkey &key) = 0;
     virtual Tval search_elem(const Tkey &key) = 0;
-    virtual void Insert(const Tkey &k, const Tval &v) = 0;
+    virtual void insert(const Tkey &k, const Tval &v) = 0;
 
-    virtual pair Pop(const Tkey &key) = 0;
-    virtual pair Pop(size_t pos) = 0; // дописать в ordermap
-    virtual void Remove(const Tkey &key) = 0;
-    virtual void Remove(size_t pos) = 0; // дописать в ordermap
-    virtual void resize() = 0;           // если массив заполнился, то перевыделяем память, в стд векторе в 2 раза увеличивается, мы будем делать мб в 1.5 раза
+    virtual pair pop(const Tkey &key) = 0;
+    virtual void remove(const Tkey &key) = 0;
+    virtual void remove(size_t pos) = 0; // дописать в ordermap
 };
 
 #endif // MAP_H

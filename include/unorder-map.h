@@ -40,9 +40,7 @@ public:
 
     unorderMap()
     {
-        head->data.key = 0;
-        head->data.val = 0;
-        head->next = nullptr;
+        head = new Node(0, 0, nullptr);
         n = 0;
     }
     unorderMap(std::vector<Node *> a)
@@ -53,7 +51,7 @@ public:
     }
     virtual bool search(const Tkey &k) override
     {
-        return check(k);
+        return check(k); // если есть - то true
     }
     virtual Tval search_elem(const Tkey &k) override
     {
@@ -67,16 +65,18 @@ public:
         }
         throw("cannot find key");
     }
-    // Вместо простого  INSERT я хочу добавибь push_front and push_back
 
-    void push_front(const Tkey &k, const Tval &v)
+    void insert(const Tkey &k, const Tval &v) override
     {
-        if (check(k) == true)
+        // Проверка на уникальность
+        if (check(k))
         {
-            throw("u have already k in list");
+            throw std::runtime_error("Key already exists in list");
         }
-        Node *b = new Node(head->data.key, head->data.val, head->next);
-        head = new Node(b->data.key, b->data.val, b->next);
+
+        // Вставка в начало списка - O(1)
+        Node *newNode = new Node(k, v, head); // next указывает на бывший head
+        head = newNode;                       // head теперь новый узел
         n++;
     }
     void push_after(size_t pos, const Tkey &k, const Tval &v)
@@ -100,21 +100,9 @@ public:
         b->next = c;
         n++;
     }
-    Tval &operator[](size_t pos)
-    {
-        Node *tmp = head;
-        for (int i = 0; i < pos && tmp != nullptr; i++)
-        {
-            tmp = tmp->next;
-        }
-        if (tmp == nullptr)
-        {
-            throw("Index out of range");
-        }
-        return tmp->data.val;
-    }
+
     // удаления буду делать по индексу, по ключу,
-    virtual void Remove(size_t pos) override
+    virtual void remove(size_t pos) override
     {
         if (pos > n)
         {
@@ -139,33 +127,43 @@ public:
         }
         delete tmp;
     }
-    virtual void Remove(const Tkey &k) override
+    virtual void remove(const Tkey &k) override
     {
         if (check(k) == false)
         {
-            throw("cannot find k in list");
+            throw ("cannot find k in list");
         }
+
         Node *tmp = head;
-        Node *prev;
-        for (int i = 0; i < n; i++)
+        Node *prev = nullptr;
+
+        while (tmp != nullptr && tmp->data.key != k)
         {
-            if (tmp->key == k)
-            {
-                break;
-            }
             prev = tmp;
             tmp = tmp->next;
         }
 
-        if (tmp->next != nullptr)
-            prev->next = tmp->next;
-        else
+        if (tmp == nullptr)
+        {
+            throw("key not found after check");
+        }
+        if (prev == nullptr)
+        {
+            head = tmp->next; // новый head - следующий элемент
+        }
+        else if (tmp->next == nullptr)
         {
             prev->next = nullptr;
         }
+        else
+        {
+            prev->next = tmp->next;
+        }
+
         delete tmp;
+        n--;
     }
-    virtual Node Pop(const Tkey &k) override
+    virtual pair pop(const Tkey &k) override
     {
 
         if (check(k) == false)
@@ -176,7 +174,7 @@ public:
         Node *prev;
         for (int i = 0; i < n; i++)
         {
-            if (tmp->key == k)
+            if (tmp->data.key == k)
             {
                 break;
             }
@@ -190,9 +188,9 @@ public:
         {
             prev->next = nullptr;
         }
-        return tmp;
+        return tmp->data;
     }
-    virtual Node Pop(size_t pos) override
+    virtual pair Pop(size_t pos)
     {
         if (pos > n)
         {
@@ -215,8 +213,55 @@ public:
         {
             prev->next = nullptr;
         }
-        return tmp;
+        return tmp->data;
+    }
+    bool operator==(const unorderMap &m)
+    {
+        if (n != m.n)
+        {
+            return false;
+        }
+        Node *tmp1 = new Node(head->data.key, head->data.val, head->next);
+        Node *tmp2 = new Node(m.head->data.key, m.head->data.val, m.head->next);
+        for (int i = 0; i < n; i++)
+        {
+            if (tmp2.head->data.key != tmp1.head->data.key || tmp2.head->data.val != tmp1.head->data.val)
+            {
+                return false;
+            }
+            tmp1 = tmp1->next;
+            tmp2 = tmp2->next;
+        }
+        return true;
+    };
+    pair &operator[](const size_t pos)
+    {
+        if (pos >= n)
+        {
+            throw("index out of range");
+        }
+        Node *tmp = head;
+        for (int i = 0; i < pos; i++)
+        {
+            tmp = tmp->next;
+        }
+        return tmp->data;
+    }
+    void print()
+    {
+        Node *tmp = head;
+        std::cout << "[";
+        for (int i = 0; i < n; i++)
+        {
+            std::cout << "{" << tmp->data.key << ": " << tmp->data.val << "}";
+            if (i < n - 1)
+            {
+                std::cout << ", ";
+            }
+            tmp = tmp->next;
+        }
+        std::cout << "]" << std::endl;
     }
 };
 
-#endif 
+#endif
