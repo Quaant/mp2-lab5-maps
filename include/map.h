@@ -22,7 +22,7 @@ public:
 
     virtual pair pop(const Tkey &key) = 0;
     virtual void remove(const Tkey &key) = 0;
-    virtual void remove(size_t pos) = 0; // дописать в ordermap
+    virtual void remove(size_t pos) = 0; 
 };
 
 #endif // MAP_H
