@@ -210,44 +210,75 @@ public:
             else
             {
                 tmp->parent->left = it->parent;
+                // }
+                it->parent->left = nullptr;
+                delete tmp;
             }
-            it->parent->left = nullptr;
-            delete tmp;
         }
-    }
-    virtual remove(size_t pos) override
-    {
-    }
+        // iterator от сюда можно будет взять
+        virtual remove(size_t pos) override
+        {
+            if (pos >= n)
+            {
+                throw("index out of range0");
+            }
+            Node *tmp = findNodeByPos(pos);
+            Tkey to_delete = tmp->data.key;
+            remove(to_delete);
+        }
+        Node *findNodeByPos(size_t target_pos)
+        {
+            size_t pos = 0;
+            return findNodeByPos(head, pos, target_pos);
+        }
+        Node *findNodeByPos(Node * root, size_t pos, size_t target_pos)
+        {
+            if (root == nullptr)
+            {
+                return nullptr;
+            }
+            Node *leftRes = findNodeByPos(root->left, pos, target_pos);
+            if (leftRes != nullptr)
+            {
+                return leftRes;
+            }
+            if (pos == target_pos)
+            {
+                return root;
+            }
+            pos++;
+            return findNodeByPos(root->right, pos, target_pos);
+        }
 
-    // вывод дерева позаимствовал у рослова и кармаева(они разрешили)
-    void printTreeWithKey(Node *root, std::string indent = "", bool isLeft = true)
-    {
-        if (root == nullptr)
-            return;
-        if (root->right)
+        // вывод дерева позаимствовал у рослова и кармаева(они разрешили)
+        void printTreeWithKey(Node * root, std::string indent = "", bool isLeft = true)
         {
-            printTreeWithKey(root->right, indent + (isLeft ? "│   " : "    "), false);
+            if (root == nullptr)
+                return;
+            if (root->right)
+            {
+                printTreeWithKey(root->right, indent + (isLeft ? "│   " : "    "), false);
+            }
+            cout << indent << (isLeft ? "└── " : "┌── ") << root->data.key << ',' << root->data.value << endl;
+            if (root->left)
+            {
+                printTreeWithKey(root->left, indent + (isLeft ? "    " : "│   "), true);
+            }
         }
-        cout << indent << (isLeft ? "└── " : "┌── ") << root->data.key << ',' << root->data.value << endl;
-        if (root->left)
+        void printTree(Node * root, std::string indent = "", bool isLeft = true)
         {
-            printTreeWithKey(root->left, indent + (isLeft ? "    " : "│   "), true);
+            if (root == nullptr)
+                return;
+            if (root->right)
+            {
+                printTree(root->right, indent + (isLeft ? "│   " : "    "), false);
+            }
+            cout << indent << (isLeft ? "└── " : "┌── ") << root->data.key << endl;
+            if (root->left)
+            {
+                printTree(root->left, indent + (isLeft ? "    " : "│   "), true);
+            }
         }
-    }
-    void printTree(Node *root, std::string indent = "", bool isLeft = true)
-    {
-        if (root == nullptr)
-            return;
-        if (root->right)
-        {
-            printTree(root->right, indent + (isLeft ? "│   " : "    "), false);
-        }
-        cout << indent << (isLeft ? "└── " : "┌── ") << root->data.key << endl;
-        if (root->left)
-        {
-            printTree(root->left, indent + (isLeft ? "    " : "│   "), true);
-        }
-    }
+    };
 };
-
 #endif
