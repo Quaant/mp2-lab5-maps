@@ -3,9 +3,6 @@
 #include "unorder-map.h"
 #include <string>
 
-// poisk vstavka udalenie
-
-// ostalos search and check sorted in orderMap
 
 // ORDER MAP TESTS
 

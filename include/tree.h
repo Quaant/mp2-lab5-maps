@@ -5,7 +5,7 @@
 #include "map.h"
 
 template <typename Tkey, typename Tval>
-class Tree : public Tmap<Tkey, Tval>
+class Tree : public TMap<Tkey, Tval>
 {
 protected:
     using pair = typename TMap<Tkey, Tval>::pair;
@@ -15,14 +15,15 @@ protected:
         Node *left;
         Node *right;
         Node *parent;
-        Node(const Tkey &k, const Tval &v, Node *l, Node *r, Node *p) : (data.key = k), (data.val = v), (left = l), (right = r), (parent = p) {};
-        Node(const pair a, Node *l, Node *r, Node *p) : (data = a), (left = l), (right = r), (parent = p) {};
+        Node(const Tkey &k, const Tval &v, Node *l, Node *r, Node *p)
+            : data(k, v), left(l), right(r), parent(p) {}
+        Node(const pair &a, Node *l, Node *r, Node *p) : data(a), left(l), right(r), parent(p) {}
     };
     Node *head;
     size_t n;
 
 public:
-    Node *GetHead() return *head;
+    Node *GetHead() { return head; }
     Tree()
     {
         head = nullptr;
@@ -48,53 +49,23 @@ public:
         deleteSubTree(head);
     }
 
-    virtual bool search(const Tkey &k) override // eto prosto proverka na nalichie
+    virtual bool search(const Tkey &k) override
     {
-        Node *tmp = head;
-        while (tmp != nullptr || tmp->data.key == k)
-        {
-            if (tmp->data.key > k)
-            {
-                tmp = tmp->left;
-            }
-            else if (tmp->data.key < k)
-            {
-                tmp = tmp->right;
-            }
-        }
-        if (tmp == nullptr)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        return findNodeByKey(k) != nullptr;
     }
     virtual Tval search_elem(const Tkey &k)
     {
-        if (search(k) == false)
+        if (head == nullptr)
+        {
+            throw("tree is empty");
+        }
+
+        Node *node = findNodeByKey(k);
+        if (node == nullptr)
         {
             throw("cant find ur elem");
         }
-        Node *tmp = head;
-
-        while (tmp != nullptr)
-        {
-            if (tmp->data.key == k)
-            {
-                return tmp->data.val;
-            }
-            else if (tmp->data.key > k)
-            {
-                tmp = tmp->left;
-            }
-            else
-            {
-                tmp = tmp->right;
-            }
-        }
-        throw("cant find ur elem");
+        return node->data.val;
     }
 
     virtual void insert(const Tkey &k, const Tval &v) override
@@ -105,43 +76,52 @@ public:
             n++;
             return;
         }
+
         Node *tmp = head;
+        Node *prev = nullptr;
+
         while (tmp != nullptr)
         {
             prev = tmp;
-            if (tmp->data.key > k)
+            if (k < tmp->data.key)
             {
                 tmp = tmp->left;
             }
-            else if (tmp->data.key < k)
+            else if (k > tmp->data.key)
             {
                 tmp = tmp->right;
             }
             else
             {
-                throw("ur key is not unique");
+                throw std::runtime_error("key is not unique");
             }
         }
-        Node *res = new Node(k, v, nullptr, nullptr, tmp->parent);
-        if (res->data.key > tmp->parent->data.key)
+
+        Node *newNode = new Node(k, v, nullptr, nullptr, prev);
+
+        if (k < prev->data.key)
         {
-            tmp->parent->right = res;
+            prev->left = newNode;
         }
         else
         {
-            tmp->parent->left = res;
+            prev->right = newNode;
         }
         n++;
     }
-    virtual remove(const Tkey &k) override
+    virtual void remove(const Tkey &k) override
     {
         if (n <= 0)
         {
-            throw("u can delete tree")
+            throw("u can delete tree");
         }
+
         Node *tmp = head;
-        while (tmp != nullptr && tmp->data.key == k)
+        Node *parent = nullptr;
+
+        while (tmp != nullptr && tmp->data.key != k)
         {
+            parent = tmp;
             if (tmp->data.key > k)
             {
                 tmp = tmp->left;
@@ -151,14 +131,21 @@ public:
                 tmp = tmp->right;
             }
         }
+
         if (tmp == nullptr)
         {
             throw("cannot find ur key in tree");
         }
+
         // listok
         if (tmp->right == nullptr && tmp->left == nullptr)
         {
-            if (tmp->parent->right->data.key == tmp->data.key)
+
+            if (tmp->parent == nullptr) // удаляем корень
+            {
+                head = nullptr;
+            }
+            else if (tmp->parent->right == tmp)
             {
                 tmp->parent->right = nullptr;
             }
@@ -167,118 +154,166 @@ public:
                 tmp->parent->left = nullptr;
             }
             delete tmp;
+            n--;
+            return;
         }
         // 1 naslednik
         else if (tmp->left == nullptr || tmp->right == nullptr)
         {
-            if (tmp->left == nullptr)
+            Node *child = (tmp->left != nullptr) ? tmp->left : tmp->right; // определяем потомка
+
+            if (tmp->parent == nullptr)
             {
-                if (tmp->parent->right->data.key == tmp->data.key)
-                {
-                    tmp->parent->right = tmp->right;
-                }
-                else
-                {
-                    tmp->parent->left = tmp->right;
-                }
+                head = child;
+                child->parent = nullptr;
+            }
+            else if (tmp->parent->right == tmp)
+            {
+                tmp->parent->right = child;
+                child->parent = tmp->parent;
             }
             else
             {
-                if (tmp->parent->right->data.key == tmp->data.key)
-                {
-                    tmp->parent->right = tmp->left;
-                }
-                else
-                {
-                    tmp->parent->left = tmp->left;
-                }
+                tmp->parent->left = child;
+                child->parent = tmp->parent;
             }
             delete tmp;
+            n--;
+            return;
         }
         // 2 naslednika
         else
         {
             Node *it = tmp->right;
-            while (it != nullptr)
+            while (it->left != nullptr) // идем пока есть левый
             {
                 it = it->left;
             }
-            if (tmp->parent->right->data.key == tmp->data.key)
+
+            Tkey minKey = it->data.key;
+            Tval minVal = it->data.val;
+
+            if (it->parent->left == it)
             {
-                tmp->parent->right = it->parent;
+                it->parent->left = it->right;
             }
             else
             {
-                tmp->parent->left = it->parent;
-                // }
-                it->parent->left = nullptr;
-                delete tmp;
+                it->parent->right = it->right;
             }
+            if (it->right != nullptr)
+            {
+                it->right->parent = it->parent;
+            }
+
+            tmp->data.key = minKey;
+            tmp->data.val = minVal;
+
+            delete it;
+            n--;
         }
-        // iterator от сюда можно будет взять
-        virtual remove(size_t pos) override
+    }
+    // iterator от сюда можно будет взять
+    virtual void remove(size_t pos) override
+    {
+        if (pos >= n)
         {
-            if (pos >= n)
-            {
-                throw("index out of range0");
-            }
-            Node *tmp = findNodeByPos(pos);
-            Tkey to_delete = tmp->data.key;
-            remove(to_delete);
+            throw("index out of range0");
         }
-        Node *findNodeByPos(size_t target_pos)
+        Node *tmp = findNodeByPos(pos);
+        Tkey to_delete = tmp->data.key;
+        remove(to_delete);
+    }
+    Node *findNodeByPos(size_t target_pos)
+    {
+        size_t pos = 0;
+        return findNodeByPos(head, pos, target_pos);
+    }
+    Node *findNodeByPos(Node *root, size_t pos, size_t target_pos)
+    {
+        if (root == nullptr)
         {
-            size_t pos = 0;
-            return findNodeByPos(head, pos, target_pos);
+            return nullptr;
         }
-        Node *findNodeByPos(Node * root, size_t pos, size_t target_pos)
+        Node *leftRes = findNodeByPos(root->left, pos, target_pos);
+        if (leftRes != nullptr)
         {
-            if (root == nullptr)
-            {
-                return nullptr;
-            }
-            Node *leftRes = findNodeByPos(root->left, pos, target_pos);
-            if (leftRes != nullptr)
-            {
-                return leftRes;
-            }
-            if (pos == target_pos)
-            {
-                return root;
-            }
-            pos++;
-            return findNodeByPos(root->right, pos, target_pos);
+            return leftRes;
+        }
+        if (pos == target_pos)
+        {
+            return root;
+        }
+        pos++;
+        return findNodeByPos(root->right, pos, target_pos);
+    }
+
+    // вывод дерева позаимствовал у рослова и кармаева(они разрешили)
+    void printTreeWithKey(Node *root, std::string indent = "", bool isLeft = true)
+    {
+        if (root == nullptr)
+            return;
+        if (root->right)
+        {
+            printTreeWithKey(root->right, indent + (isLeft ? "│   " : "    "), false);
+        }
+        std::cout << indent << (isLeft ? "└── " : "┌── ") << root->data.key << ',' << root->data.value << std::endl;
+        if (root->left)
+        {
+            printTreeWithKey(root->left, indent + (isLeft ? "    " : "│   "), true);
+        }
+    }
+    void printTree(Node *root, std::string indent = "", bool isLeft = true)
+    {
+        if (root == nullptr)
+            return;
+        if (root->right)
+        {
+            printTree(root->right, indent + (isLeft ? "│   " : "    "), false);
+        }
+        std::cout << indent << (isLeft ? "└── " : "┌── ") << root->data.key << std::endl;
+        if (root->left)
+        {
+            printTree(root->left, indent + (isLeft ? "    " : "│   "), true);
+        }
+    }
+    virtual pair pop(const Tkey &k) override
+    {
+        Node *node = findNodeByKey(k);
+        if (node == nullptr)
+        {
+            throw("Key not found");
         }
 
-        // вывод дерева позаимствовал у рослова и кармаева(они разрешили)
-        void printTreeWithKey(Node * root, std::string indent = "", bool isLeft = true)
+        pair result = node->data;
+        remove(k);
+        return result;
+    }
+    Node *findNodeByKey(const Tkey &k)
+    {
+        if (head == nullptr)
         {
-            if (root == nullptr)
-                return;
-            if (root->right)
+            return nullptr;
+        }
+
+        Node *tmp = head;
+        while (tmp != nullptr)
+        {
+            if (tmp->data.key == k)
             {
-                printTreeWithKey(root->right, indent + (isLeft ? "│   " : "    "), false);
+                return tmp;
             }
-            cout << indent << (isLeft ? "└── " : "┌── ") << root->data.key << ',' << root->data.value << endl;
-            if (root->left)
+            else if (k < tmp->data.key)
             {
-                printTreeWithKey(root->left, indent + (isLeft ? "    " : "│   "), true);
+                tmp = tmp->left;
+            }
+            else
+            {
+                tmp = tmp->right;
             }
         }
-        void printTree(Node * root, std::string indent = "", bool isLeft = true)
-        {
-            if (root == nullptr)
-                return;
-            if (root->right)
-            {
-                printTree(root->right, indent + (isLeft ? "│   " : "    "), false);
-            }
-            cout << indent << (isLeft ? "└── " : "┌── ") << root->data.key << endl;
-            if (root->left)
-            {
-                printTree(root->left, indent + (isLeft ? "    " : "│   "), true);
-            }
-        }
-    };
+        return nullptr;
+    }
 };
+
 #endif
