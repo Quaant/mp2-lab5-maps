@@ -7,6 +7,7 @@
 template <typename Tkey, typename Tval>
 class Tree : public TMap<Tkey, Tval>
 {
+
 protected:
     using pair = typename TMap<Tkey, Tval>::pair;
     struct Node
@@ -19,8 +20,10 @@ protected:
             : data(k, v), left(l), right(r), parent(p) {}
         Node(const pair &a, Node *l, Node *r, Node *p) : data(a), left(l), right(r), parent(p) {}
     };
-    Node *head;
     size_t n;
+
+private:
+    Node *head;
 
 public:
     Node *GetHead() { return head; }
@@ -224,18 +227,21 @@ public:
         Tkey to_delete = tmp->data.key;
         remove(to_delete);
     }
-    Node *findNodeByPos(size_t target_pos)
+    template <typename NodeType>
+    NodeType *findNodeByPos(size_t target_pos)
     {
         size_t pos = 0;
         return findNodeByPos(head, pos, target_pos);
     }
-    Node *findNodeByPos(Node *root, size_t pos, size_t target_pos)
+    // hz cho za metod:
+    template <typename NodeType>
+    NodeType *findNodeByPos(NodeType *root, size_t pos, size_t target_pos)
     {
         if (root == nullptr)
         {
             return nullptr;
         }
-        Node *leftRes = findNodeByPos(root->left, pos, target_pos);
+        NodeType *leftRes = findNodeByPos(root->left, pos, target_pos);
         if (leftRes != nullptr)
         {
             return leftRes;
@@ -249,7 +255,8 @@ public:
     }
 
     // вывод дерева позаимствовал у рослова и кармаева(они разрешили)
-    void printTreeWithKey(Node *root, std::string indent = "", bool isLeft = true)
+    template <typename NodeType>
+    void printTreeWithKey(NodeType *root, std::string indent = "", bool isLeft = true)
     {
         if (root == nullptr)
             return;
@@ -257,13 +264,14 @@ public:
         {
             printTreeWithKey(root->right, indent + (isLeft ? "│   " : "    "), false);
         }
-        std::cout << indent << (isLeft ? "└── " : "┌── ") << root->data.key << ',' << root->data.value << std::endl;
+        std::cout << indent << (isLeft ? "└── " : "┌── ") << root->data.key << ',' << root->data.val << std::endl;
         if (root->left)
         {
             printTreeWithKey(root->left, indent + (isLeft ? "    " : "│   "), true);
         }
     }
-    void printTree(Node *root, std::string indent = "", bool isLeft = true)
+    template <typename NodeType>
+    void printTree(NodeType *root, std::string indent = "", bool isLeft = true)
     {
         if (root == nullptr)
             return;
@@ -289,14 +297,15 @@ public:
         remove(k);
         return result;
     }
-    Node *findNodeByKey(const Tkey &k)
+    template <typename NodeType>
+    NodeType *findNodeByKey(const Tkey &k)
     {
         if (head == nullptr)
         {
             return nullptr;
         }
 
-        Node *tmp = head;
+        NodeType *tmp = head;
         while (tmp != nullptr)
         {
             if (tmp->data.key == k)
