@@ -19,35 +19,12 @@ protected:
         Node(const Tkey &k, const Tval &v, Node *l, Node *r, Node *p)
             : data(k, v), left(l), right(r), parent(p) {}
         Node(const pair &a, Node *l, Node *r, Node *p) : data(a), left(l), right(r), parent(p) {}
+        virtual ~Node() = default; 
     };
     size_t n;
 
-    template <typename NodeType>
-    NodeType *findNodeByPos(size_t target_pos)
-    {
-        size_t pos = 0;
-        return findNodeByPos<NodeType>(head, pos, target_pos);
-    }
-    // hz cho za metod:
-    template <typename NodeType>
-    NodeType *findNodeByPos(NodeType *root, size_t pos, size_t target_pos)
-    {
-        if (root == nullptr)
-        {
-            return nullptr;
-        }
-        NodeType *leftRes = findNodeByPos<NodeType>(root->left, pos, target_pos);
-        if (leftRes != nullptr)
-        {
-            return leftRes;
-        }
-        if (pos == target_pos)
-        {
-            return root;
-        }
-        pos++;
-        return findNodeByPos<NodeType>(root->right, pos, target_pos);
-    }
+   
+   
     template <typename NodeType>
     NodeType *findNodeByKey(const Tkey &k)
     {
@@ -275,16 +252,58 @@ public:
         {
             throw("index out of range0");
         }
-        Node *tmp = findNodeByPos<Node>(pos);
+        Node *tmp = findNodeByPos(pos);
         Tkey to_delete = tmp->data.key;
         remove(to_delete);
     }
-
+    Node *findNodeByPos(Node *root, size_t pos, size_t target_pos)
+    {
+        if (root == nullptr)
+        {
+            return nullptr;
+        }
+        Node *leftRes = findNodeByPos(root->left, pos, target_pos);
+        if (leftRes != nullptr)
+        {
+            return leftRes;
+        }
+        if (pos == target_pos)
+        {
+            return root;
+        }
+        pos++;
+        return findNodeByPos(root->right, pos, target_pos);
+    }
     Node *findNodeByPos(size_t target_pos)
     {
-        return findNodeByPos<Node>(target_pos);
+        size_t pos = 0;
+        return findNodeByPos(head, pos, target_pos);
     }
+    Node *findNodeByKey(const Tkey &k)
+    {
+        if (head == nullptr)
+        {
+            return nullptr;
+        }
 
+        Node *tmp = head;
+        while (tmp != nullptr)
+        {
+            if (tmp->data.key == k)
+            {
+                return tmp;
+            }
+            else if (k < tmp->data.key)
+            {
+                tmp = tmp->left;
+            }
+            else
+            {
+                tmp = tmp->right;
+            }
+        }
+        return nullptr;
+    }
     // вывод дерева позаимствовал у рослова и кармаева(они разрешили)
     
     void printTreeWithKey(Node *root, std::string indent = "", bool isLeft = true)
@@ -328,10 +347,7 @@ public:
         return result;
     }
 
-    Node *findNodeByKey(const Tkey &k)
-    {
-        return findNodeByKey<Node>(k);
-    }
+    
 };
 
 #endif

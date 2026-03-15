@@ -14,6 +14,12 @@ TEST(Tree, insert)
     EXPECT_EQ(t.findNodeByPos(0)->data.val, 1.0);
     EXPECT_EQ(t.findNodeByPos(0)->data.key, 1);
 }
+TEST(Tree, findNodeByKey){ 
+    Tree<int, double> t;
+    EXPECT_NO_THROW(t.insert(1, 1.0));
+    EXPECT_EQ(t.findNodeByKey(1)->data.val, 1.0);
+    EXPECT_EQ(t.findNodeByKey(1)->data.key, 1);
+}
 TEST(Tree, insert_throw_if_key_isnot_unique)
 {
     Tree<int, double> t;
