@@ -22,9 +22,61 @@ protected:
     };
     size_t n;
 
+    template <typename NodeType>
+    NodeType *findNodeByPos(size_t target_pos)
+    {
+        size_t pos = 0;
+        return findNodeByPos<NodeType>(head, pos, target_pos);
+    }
+    // hz cho za metod:
+    template <typename NodeType>
+    NodeType *findNodeByPos(NodeType *root, size_t pos, size_t target_pos)
+    {
+        if (root == nullptr)
+        {
+            return nullptr;
+        }
+        NodeType *leftRes = findNodeByPos<NodeType>(root->left, pos, target_pos);
+        if (leftRes != nullptr)
+        {
+            return leftRes;
+        }
+        if (pos == target_pos)
+        {
+            return root;
+        }
+        pos++;
+        return findNodeByPos<NodeType>(root->right, pos, target_pos);
+    }
+    template <typename NodeType>
+    NodeType *findNodeByKey(const Tkey &k)
+    {
+        if (head == nullptr)
+        {
+            return nullptr;
+        }
+
+        NodeType *tmp = head;
+        while (tmp != nullptr)
+        {
+            if (tmp->data.key == k)
+            {
+                return tmp;
+            }
+            else if (k < tmp->data.key)
+            {
+                tmp = tmp->left;
+            }
+            else
+            {
+                tmp = tmp->right;
+            }
+        }
+        return nullptr;
+    }
+
 private:
     Node *head;
-
 public:
     Node *GetHead() { return head; }
     Tree()
@@ -63,7 +115,7 @@ public:
             throw("tree is empty");
         }
 
-        Node *node = findNodeByKey(k);
+        Node *node = findNodeByKey<Node>(k);
         if (node == nullptr)
         {
             throw("cant find ur elem");
@@ -223,40 +275,19 @@ public:
         {
             throw("index out of range0");
         }
-        Node *tmp = findNodeByPos(pos);
+        Node *tmp = findNodeByPos<Node>(pos);
         Tkey to_delete = tmp->data.key;
         remove(to_delete);
     }
-    template <typename NodeType>
-    NodeType *findNodeByPos(size_t target_pos)
+
+    Node *findNodeByPos(size_t target_pos)
     {
-        size_t pos = 0;
-        return findNodeByPos(head, pos, target_pos);
-    }
-    // hz cho za metod:
-    template <typename NodeType>
-    NodeType *findNodeByPos(NodeType *root, size_t pos, size_t target_pos)
-    {
-        if (root == nullptr)
-        {
-            return nullptr;
-        }
-        NodeType *leftRes = findNodeByPos(root->left, pos, target_pos);
-        if (leftRes != nullptr)
-        {
-            return leftRes;
-        }
-        if (pos == target_pos)
-        {
-            return root;
-        }
-        pos++;
-        return findNodeByPos(root->right, pos, target_pos);
+        return findNodeByPos<Node>(target_pos);
     }
 
     // вывод дерева позаимствовал у рослова и кармаева(они разрешили)
-    template <typename NodeType>
-    void printTreeWithKey(NodeType *root, std::string indent = "", bool isLeft = true)
+    
+    void printTreeWithKey(Node *root, std::string indent = "", bool isLeft = true)
     {
         if (root == nullptr)
             return;
@@ -270,8 +301,7 @@ public:
             printTreeWithKey(root->left, indent + (isLeft ? "    " : "│   "), true);
         }
     }
-    template <typename NodeType>
-    void printTree(NodeType *root, std::string indent = "", bool isLeft = true)
+    void printTree(Node *root, std::string indent = "", bool isLeft = true)
     {
         if (root == nullptr)
             return;
@@ -297,31 +327,10 @@ public:
         remove(k);
         return result;
     }
-    template <typename NodeType>
-    NodeType *findNodeByKey(const Tkey &k)
-    {
-        if (head == nullptr)
-        {
-            return nullptr;
-        }
 
-        NodeType *tmp = head;
-        while (tmp != nullptr)
-        {
-            if (tmp->data.key == k)
-            {
-                return tmp;
-            }
-            else if (k < tmp->data.key)
-            {
-                tmp = tmp->left;
-            }
-            else
-            {
-                tmp = tmp->right;
-            }
-        }
-        return nullptr;
+    Node *findNodeByKey(const Tkey &k)
+    {
+        return findNodeByKey<Node>(k);
     }
 };
 
