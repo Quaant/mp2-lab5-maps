@@ -1,9 +1,13 @@
 #include <iostream>
-#include "order-map.h"
-#include "unorder-map.h"
+#include "avltree.h" 
+
+using namespace std; 
+
 
 int main()
 {
-    std::cout << "danil kolbasenko";
+    avltree <int, double> t; 
+    t.printAvlTree();
+    cout << "ok" << endl; 
     return 0;
 }

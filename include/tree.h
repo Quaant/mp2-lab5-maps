@@ -23,34 +23,6 @@ protected:
     };
     size_t n;
 
-   
-   
-    template <typename NodeType>
-    NodeType *findNodeByKey(const Tkey &k)
-    {
-        if (head == nullptr)
-        {
-            return nullptr;
-        }
-
-        NodeType *tmp = head;
-        while (tmp != nullptr)
-        {
-            if (tmp->data.key == k)
-            {
-                return tmp;
-            }
-            else if (k < tmp->data.key)
-            {
-                tmp = tmp->left;
-            }
-            else
-            {
-                tmp = tmp->right;
-            }
-        }
-        return nullptr;
-    }
 
 private:
     Node *head;
@@ -92,7 +64,7 @@ public:
             throw("tree is empty");
         }
 
-        Node *node = findNodeByKey<Node>(k);
+        Node *node = findNodeByKey(k);
         if (node == nullptr)
         {
             throw("cant find ur elem");
