@@ -12,34 +12,89 @@ private:
     struct avlNode : public Tree<Tkey, Tval>::Node
     {
         int height;
+        avlNode()
+            : Tree<Tkey, Tval>::Node(0,0,nullptr,nullptr,nullptr), height(1) {};             
         avlNode(const Tkey &k, const Tval &v, avlNode *l, avlNode *r, avlNode *p, int h = 1) 
             : Tree<Tkey, Tval>::Node(k, v, l, r, p), height(h) {}
-
-        };
+        //разве для Node не нужен оператор=? 
+    };
   
     avlNode *head;
-    void newHeight(avlNode *root){ 
+    void updateHeight(avlNode *root){ 
         root->height = 1 + std::max(root->left.height, root->right.height);
     }
     int balance(avlNode *root) {
-        return abs(root->right.height - root.left.height); 
+        if (root == nullptr){
+            return 0; 
+        }
+        return root->right.height - root.left.height; 
     };
-    void LLrotate(avlNode *root){
-        
-    } 
-    void LRrotate(avlNode *root){
-    }
-    void RRrotate(avlNode *root){
-    }
-    void RLrotate(avlNode *root){ 
-    }
+    avlNode* LL(avlNode *root){
+        if (root == nullptr || root->left == nullptr){ 
+            return root; 
+        }
+        avlNode* parent = root->parent; 
+        avlNode* left_child = root->left; 
+        avlNode* left_child_right = left_child->right; 
 
+        left_child->right = root; 
+        root->left = left_child_right;
+        left_child_right->parent = root; 
+        root->parent = left_child; 
+    
+        left_child->parent = parent; 
+        if (parent->right == root){ 
+            parent->right = left_child;
+        }
+        else{
+            parent->left = left_child; 
+        }
+        updateHeight(root);
+        updateHeight(left_child);
+        
+        return left_child; 
+    } 
+    avlNode* LR(avlNode *root){
+    }
+    avlNode* RR(avlNode *root){
+        if (root == nullptr || root->left == nullptr){ 
+            return root; 
+        }
+        avlNode* parent = root->parent; 
+        avlNode* right_child = root->right; 
+        avlNode* right_child_left = right_child->left; 
+
+        right_child->left = root; 
+        root->parent = right_child; 
+        root->right = right_child_left; 
+        right_child_left->parent = root; 
+
+        right_child->parent = parent; 
+
+        if(parent->left == root){ 
+            parent->left = right_child; 
+        }
+        else{ 
+            parent->right = right_child; 
+        }
+        updateHeight(root); 
+        updateHeight(right_child); 
+
+        return right_child; 
+    }
+    avlNode* RL(avlNode *root){ 
+    }
+    void Rotate(avlNode *root){ //эту просто будем запускать после вставки рекурсивно, для балансировки(в ней будут лежать LL LR RL RR ) 
+    }
 public:
-    avltree() : Tree<Tkey, Tval>(), head(nullptr) {}
+    avltree() : Tree<Tkey, Tval>(), head(nullptr) {}; 
+    avltree(avlNode *h){
+        head = h; 
+        head->parent = nullptr; 
+    } 
     void remove(size_t pos) override {};
     void remove(const Tkey &k) override {};
     void insert(const Tkey &k, const Tval &v) override {
-        tree::insert
     };
     bool search(const Tkey &k) override
     {
@@ -57,6 +112,9 @@ public:
     }
     avlNode *findNodebyPosition(size_t pos)
     {
+        //upcast - mozhno ne castit' 
+        //downcast - libo static_cast libo dynamic_cast 
+        //
         return static_cast<avlNode*>(this->findNodeByPos(pos));
     }
     avlNode *findNodebyPosition(avlNode root, size_t pos, size_t target_pos)

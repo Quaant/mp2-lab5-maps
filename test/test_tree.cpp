@@ -93,9 +93,9 @@ TEST(Tree, remove_head)
     t.insert(1, 1.0);
     t.insert(5, 5.0);
     t.insert(7, 7.0);
-    t.printTree(t.GetHead());
+    //t.printTree(t.GetHead());
     EXPECT_NO_THROW(t.remove(4));
-    t.printTree(t.GetHead()); 
+    //t.printTree(t.GetHead()); 
 }
 TEST(GoogleTestCheck, IsWorking)
 {
