@@ -43,18 +43,58 @@ private:
         root->parent = left_child; 
     
         left_child->parent = parent; 
+        if(parent != nullptr){
         if (parent->right == root){ 
             parent->right = left_child;
         }
         else{
             parent->left = left_child; 
-        }
+        }}
         updateHeight(root);
         updateHeight(left_child);
         
         return left_child; 
     } 
     avlNode* LR(avlNode *root){
+        if (root == nullptr || root->right == nullptr){ 
+            return root; 
+        } 
+        if (root->right->left == nullptr){ 
+            return RR(root); 
+        }
+
+        avlNode* parent = root->parent; 
+        avlNode* left_child = root->left; 
+        avlNode* left_child_right = left_child->right; 
+        avlNode* lcr_left = left_child_right->left; 
+        avlNode* lcr_right = left_child_right->right; 
+
+        left_child_right->left = left_child; 
+        left_child->parent = left_child_right; 
+        left_child_right->right = root; 
+        root->parent = left_child_right; 
+        left_child_right->parent = parent; 
+
+        root->left = lcr_right; 
+        lcr_right->parent = root; 
+        left_child->right = lcr_left;
+        lcr_left->parent = left_child; 
+
+        if(parent != nullptr){
+        if(parent->left == root){ 
+            parent->left = left_child_right; 
+        }   
+
+        else{ 
+            parent->right = left_child_right; 
+        }}
+
+        updateHeight(root);
+        updateHeight(left_child); 
+        updateHeight(left_child_right);
+
+        return left_child_right; 
+    
     }
     avlNode* RR(avlNode *root){
         if (root == nullptr || root->left == nullptr){ 
@@ -70,19 +110,56 @@ private:
         right_child_left->parent = root; 
 
         right_child->parent = parent; 
-
+        if(parent != nullptr){
         if(parent->left == root){ 
             parent->left = right_child; 
         }
         else{ 
             parent->right = right_child; 
-        }
+        
+        }}
         updateHeight(root); 
         updateHeight(right_child); 
 
         return right_child; 
     }
-    avlNode* RL(avlNode *root){ 
+    avlNode* RL(avlNode *root){
+        if (root == nullptr || root->right == nullptr){ 
+            return root; 
+        } 
+        if (root->right->left == nullptr){ 
+            return RR(root); 
+        }
+        avlNode* right_child = root->right; 
+        avlNode* parent = root->parent; 
+        avlNode* right_child_left = right_child->left; 
+        avlNode* rcl_left = right_child_left->left; 
+        avlNode* rcl_right = right_child_left->right; 
+
+        right_child_left->left = root; 
+        right_child_left->parent = parent; 
+        right_child_left->right = right_child; 
+        right_child->parent = right_child_left; 
+        root->parent = right_child_left; 
+        
+        root->right = rcl_left; 
+        rcl_left->parent = root; 
+        right_child->left = rcl_right; 
+        rcl_right->parent = right_child; 
+
+        if(parent != nullptr){
+        if(parent->right == root){ 
+            parent->right = right_child_left;
+
+        }
+        else{ 
+            parent->left = right_child_left;  
+        }}
+        updateHeight(root); 
+        updateHeight(right_child); 
+        updateHeight(right_child_left); 
+
+        return right_child_left; 
     }
     void Rotate(avlNode *root){ //эту просто будем запускать после вставки рекурсивно, для балансировки(в ней будут лежать LL LR RL RR ) 
     }
