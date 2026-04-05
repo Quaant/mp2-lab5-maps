@@ -53,112 +53,142 @@ private:
         
         return left_child; 
     } 
-    avlNode* LR(avlNode *root){
-        if (root == nullptr || root->right == nullptr){ 
-            return root; 
-        } 
-        if (to_avl(root->right->left) == nullptr){ 
-            return RR(root); 
+    avlNode* LR(avlNode *root) {
+    if (root == nullptr || root->left == nullptr) { 
+        return root; 
+    }
+    
+    
+    avlNode* parent = to_avl(root->parent);
+    avlNode* left_child = to_avl(root->left);
+    avlNode* left_child_right = to_avl(left_child->right);
+    
+    
+    if (left_child_right == nullptr) {
+
+        return LL(root);
+    }
+    
+    avlNode* lcr_left = to_avl(left_child_right->left);
+    avlNode* lcr_right = to_avl(left_child_right->right);
+    
+
+    left_child_right->left = left_child;
+    left_child->parent = left_child_right;
+    
+    left_child_right->right = root;
+    root->parent = left_child_right;
+    
+    left_child_right->parent = parent;
+    
+    root->left = lcr_right;
+    if (lcr_right) lcr_right->parent = root;
+    
+    left_child->right = lcr_left;
+    if (lcr_left) lcr_left->parent = left_child;
+    
+    
+    if (parent != nullptr) {
+        if (parent->left == root) {
+            parent->left = left_child_right;
+        } else if (parent->right == root) {
+            parent->right = left_child_right;
         }
-
+    }
+    
+    updateHeight(left_child);
+    updateHeight(root);
+    updateHeight(left_child_right);
+    
+    if (left_child_right->parent == nullptr) {
+        head = left_child_right;
+    }
+    
+    return left_child_right;
+}
+    avlNode* RR(avlNode *root){
+        if (root == nullptr || root->left == nullptr){ 
+            return root; 
+        }
         avlNode* parent = to_avl(root->parent); 
-        avlNode* left_child = to_avl(root->left); 
-        avlNode* left_child_right = to_avl(left_child->right); 
-        avlNode* lcr_left = to_avl(left_child_right->left); 
-        avlNode* lcr_right = to_avl(left_child_right->right); 
+        avlNode* right_child = to_avl(root->right); 
+        avlNode* right_child_left = to_avl(right_child->left); 
 
-        left_child_right->left = left_child; 
-        left_child->parent = left_child_right; 
-        left_child_right->right = root; 
-        root->parent = left_child_right; 
-        left_child_right->parent = parent; 
+        right_child->left = root; 
+        root->parent = right_child; 
+        root->right = right_child_left; 
+        right_child_left->parent = root; 
 
-        root->left = lcr_right; 
-        lcr_right->parent = root; 
-        left_child->right = lcr_left;
-        lcr_left->parent = left_child; 
-
+        right_child->parent = parent; 
         if(parent != nullptr){
         if(parent->left == root){ 
-            parent->left = left_child_right; 
-        }   
-
+            parent->left = right_child; 
+        }
         else{ 
-            parent->right = left_child_right; 
+            parent->right = right_child; 
+        
         }}
+        updateHeight(root); 
+        updateHeight(right_child); 
 
-        updateHeight(root);
-        updateHeight(left_child); 
-        updateHeight(left_child_right);
-
-        return left_child_right; 
+        return right_child; 
+    }
+    avlNode* RL(avlNode *root) {
+    if (root == nullptr || root->right == nullptr) { 
+        return root; 
+    }
     
+
+    avlNode* parent = to_avl(root->parent);
+    avlNode* right_child = to_avl(root->right);
+    avlNode* right_child_left = to_avl(right_child->left);
+    
+    
+    if (right_child_left == nullptr) {
+
+        return RR(root);
     }
-    avlNode* RR(avlNode *root){
-        // if (root == nullptr || root->left == nullptr){ 
-        //     return root; 
-        // }
-        // avlNode* parent = root->parent; 
-        // avlNode* right_child = root->right; 
-        // avlNode* right_child_left = right_child->left; 
-
-        // right_child->left = root; 
-        // root->parent = right_child; 
-        // root->right = right_child_left; 
-        // right_child_left->parent = root; 
-
-        // right_child->parent = parent; 
-        // if(parent != nullptr){
-        // if(parent->left == root){ 
-        //     parent->left = right_child; 
-        // }
-        // else{ 
-        //     parent->right = right_child; 
-        
-        // }}
-        // updateHeight(root); 
-        // updateHeight(right_child); 
-
-        // return right_child; 
+    
+    avlNode* rcl_left = to_avl(right_child_left->left);
+    avlNode* rcl_right = to_avl(right_child_left->right);
+    
+    
+    right_child_left->left = root;
+    root->parent = right_child_left;
+    
+    right_child_left->right = right_child;
+    right_child->parent = right_child_left;
+    
+    right_child_left->parent = parent;
+    
+    
+    root->right = rcl_left;
+    if (rcl_left) rcl_left->parent = root;
+    
+    right_child->left = rcl_right;
+    if (rcl_right) rcl_right->parent = right_child;
+    
+    
+    if (parent != nullptr) {
+        if (parent->left == root) {
+            parent->left = right_child_left;
+        } else if (parent->right == root) {
+            parent->right = right_child_left;
+        }
     }
-    avlNode* RL(avlNode *root){
-        // if (root == nullptr || root->right == nullptr){ 
-        //     return root; 
-        // } 
-        // if (root->right->left == nullptr){ 
-        //     return RR(root); 
-        // }
-        // avlNode* right_child = root->right; 
-        // avlNode* parent = root->parent; 
-        // avlNode* right_child_left = right_child->left; 
-        // avlNode* rcl_left = right_child_left->left; 
-        // avlNode* rcl_right = right_child_left->right; 
+    
 
-        // right_child_left->left = root; 
-        // right_child_left->parent = parent; 
-        // right_child_left->right = right_child; 
-        // right_child->parent = right_child_left; 
-        // root->parent = right_child_left; 
-        
-        // root->right = rcl_left; 
-        // rcl_left->parent = root; 
-        // right_child->left = rcl_right; 
-        // rcl_right->parent = right_child; 
-
-        // if(parent != nullptr){
-        // if(parent->right == root){ 
-        //     parent->right = right_child_left;
-
-        // }
-        // else{ 
-        //     parent->left = right_child_left;  
-        // }}
-        // updateHeight(root); 
-        // updateHeight(right_child); 
-        // updateHeight(right_child_left); 
-
-        // return right_child_left; 
+    updateHeight(root);
+    updateHeight(right_child);
+    updateHeight(right_child_left);
+    
+    
+    if (right_child_left->parent == nullptr) {
+        head = right_child_left;
     }
+    
+    return right_child_left;
+}
     void updateHeight(avlNode *root){ 
         int a = 0, b = 0; 
         if (root->left != nullptr){ 
@@ -201,6 +231,7 @@ private:
         if (balik == -2){ 
             if (balance(static_cast<avlNode*>(bal->left)) == 1){ 
                 //LR 
+                std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl; 
                 bal = LR(bal); 
                 bal = static_cast<avlNode*>(bal->parent); 
             }
@@ -246,8 +277,7 @@ public:
         while(tmp != nullptr){ 
             prev = tmp; 
             if (k < tmp->data.key)
-        {
-            
+        {   
             tmp = static_cast<avlNode*>(tmp->left);
         }
         else if (k > tmp->data.key)
