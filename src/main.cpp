@@ -19,5 +19,16 @@ int main()
      cout << "!!!!!!!!!!!!!!!!!!" << endl; 
     t.printAvlTree(); 
     cout << "ok" << endl; 
+    cout << "\nУдаление 10 (лист):" << endl;
+    t.remove(10);
+    t.printAvlTree();
+        t.remove(20);
+            t.printAvlTree();
+
+            t.remove(30);
+    t.printAvlTree();
+
+
+
     return 0;
 }

@@ -4,7 +4,6 @@
 #include "tree.h"
 #include <cmath>
 
-
 template <typename Tkey, typename Tval>
 class avltree : public Tree<Tkey, Tval>
 {
@@ -16,180 +15,16 @@ private:
             : Tree<Tkey, Tval>::Node(0,0,nullptr,nullptr,nullptr), height(1) {};             
         avlNode(const Tkey &k, const Tval &v, avlNode *l, avlNode *r, avlNode *p, int h = 1) 
             : Tree<Tkey, Tval>::Node(k, v, l, r, p), height(h) {}
-        //разве для Node не нужен оператор=? 
     };
 
     avlNode *head;
 
     inline avlNode* to_avl(typename Tree<Tkey, Tval>::Node* node) {
-    return static_cast<avlNode*>(node);
-}
-    
-    avlNode* LL(avlNode *root){
-        if (root == nullptr || root->left == nullptr){ 
-            return root; 
-        }
-        avlNode* parent = to_avl(root->parent); 
-        avlNode* left_child = to_avl(root->left); 
-        avlNode* left_child_right = to_avl(left_child->right); 
-
-        
-        left_child->right = root; 
-        root->left = left_child_right;
-        left_child_right->parent = root; 
-        root->parent = left_child; 
-
-        
-        left_child->parent = parent; 
-        if(parent != nullptr){
-        if (parent->right == root){ 
-            parent->right = left_child;
-        }
-        else{
-            parent->left = left_child; 
-        }}
-        updateHeight(root);
-        updateHeight(left_child);
-        
-        return left_child; 
-    } 
-    avlNode* LR(avlNode *root) {
-    if (root == nullptr || root->left == nullptr) { 
-        return root; 
+        return static_cast<avlNode*>(node);
     }
     
-    
-    avlNode* parent = to_avl(root->parent);
-    avlNode* left_child = to_avl(root->left);
-    avlNode* left_child_right = to_avl(left_child->right);
-    
-    
-    if (left_child_right == nullptr) {
-
-        return LL(root);
-    }
-    
-    avlNode* lcr_left = to_avl(left_child_right->left);
-    avlNode* lcr_right = to_avl(left_child_right->right);
-    
-
-    left_child_right->left = left_child;
-    left_child->parent = left_child_right;
-    
-    left_child_right->right = root;
-    root->parent = left_child_right;
-    
-    left_child_right->parent = parent;
-    
-    root->left = lcr_right;
-    if (lcr_right) lcr_right->parent = root;
-    
-    left_child->right = lcr_left;
-    if (lcr_left) lcr_left->parent = left_child;
-    
-    
-    if (parent != nullptr) {
-        if (parent->left == root) {
-            parent->left = left_child_right;
-        } else if (parent->right == root) {
-            parent->right = left_child_right;
-        }
-    }
-    
-    updateHeight(left_child);
-    updateHeight(root);
-    updateHeight(left_child_right);
-    
-    if (left_child_right->parent == nullptr) {
-        head = left_child_right;
-    }
-    
-    return left_child_right;
-}
-    avlNode* RR(avlNode *root){
-        if (root == nullptr || root->left == nullptr){ 
-            return root; 
-        }
-        avlNode* parent = to_avl(root->parent); 
-        avlNode* right_child = to_avl(root->right); 
-        avlNode* right_child_left = to_avl(right_child->left); 
-
-        right_child->left = root; 
-        root->parent = right_child; 
-        root->right = right_child_left; 
-        right_child_left->parent = root; 
-
-        right_child->parent = parent; 
-        if(parent != nullptr){
-        if(parent->left == root){ 
-            parent->left = right_child; 
-        }
-        else{ 
-            parent->right = right_child; 
-        
-        }}
-        updateHeight(root); 
-        updateHeight(right_child); 
-
-        return right_child; 
-    }
-    avlNode* RL(avlNode *root) {
-    if (root == nullptr || root->right == nullptr) { 
-        return root; 
-    }
-    
-
-    avlNode* parent = to_avl(root->parent);
-    avlNode* right_child = to_avl(root->right);
-    avlNode* right_child_left = to_avl(right_child->left);
-    
-    
-    if (right_child_left == nullptr) {
-
-        return RR(root);
-    }
-    
-    avlNode* rcl_left = to_avl(right_child_left->left);
-    avlNode* rcl_right = to_avl(right_child_left->right);
-    
-    
-    right_child_left->left = root;
-    root->parent = right_child_left;
-    
-    right_child_left->right = right_child;
-    right_child->parent = right_child_left;
-    
-    right_child_left->parent = parent;
-    
-    
-    root->right = rcl_left;
-    if (rcl_left) rcl_left->parent = root;
-    
-    right_child->left = rcl_right;
-    if (rcl_right) rcl_right->parent = right_child;
-    
-    
-    if (parent != nullptr) {
-        if (parent->left == root) {
-            parent->left = right_child_left;
-        } else if (parent->right == root) {
-            parent->right = right_child_left;
-        }
-    }
-    
-
-    updateHeight(root);
-    updateHeight(right_child);
-    updateHeight(right_child_left);
-    
-    
-    if (right_child_left->parent == nullptr) {
-        head = right_child_left;
-    }
-    
-    return right_child_left;
-}
     void updateHeight(avlNode *root){ 
+        if (root == nullptr) return;
         int a = 0, b = 0; 
         if (root->left != nullptr){ 
             a = to_avl(root->left)->height; 
@@ -199,75 +34,120 @@ private:
         }
         root->height = 1 + std::max(a, b);
     }
+    
     int balance(avlNode *root) {
-        if (root == nullptr){    
-            return 0; 
-        }
-
+        if (root == nullptr) return 0;
+        int leftH = root->left ? to_avl(root->left)->height : 0;
+        int rightH = root->right ? to_avl(root->right)->height : 0;
+        return rightH - leftH;
+    }
+    
+    avlNode* LL(avlNode *root){
+        if (root == nullptr || root->left == nullptr) return root;
         
-        //УМИРАЕМ ЗДЕСЬ!!!!
-        if (root->right != nullptr && root->left != nullptr){ 
-        return to_avl(root->right)->height - to_avl(root->left)->height;} 
-        else if (root->right == nullptr && root->left != nullptr){ 
-            return -to_avl(root->left)->height; 
-        } 
-        else if (root->left == nullptr && root->right != nullptr){ 
-            return to_avl(root->right)->height; 
-        }
-        else{ 
-            return 0; 
-        }
-    };
-    void rebalance(avlNode *root){ 
-        if (root == nullptr) {
-            return;}
-        avlNode* bal = root; 
+        avlNode* parent = to_avl(root->parent);
+        avlNode* left_child = to_avl(root->left);
+        avlNode* left_child_right = to_avl(left_child->right);
 
-        while (bal != nullptr){ 
+        left_child->right = root;
+        root->left = left_child_right;
+        
+        if (left_child_right) left_child_right->parent = root;
+        root->parent = left_child;
+        left_child->parent = parent;
+        
+        if (parent != nullptr) {
+            if (parent->left == root) parent->left = left_child;
+            else parent->right = left_child;
+        }
+        
+        updateHeight(root);
+        updateHeight(left_child);
+        
+        if (left_child->parent == nullptr) head = left_child;
+        
+        return left_child;
+    }
+    
+    avlNode* RR(avlNode *root){
+        if (root == nullptr || root->right == nullptr) return root;
+        
+        avlNode* parent = to_avl(root->parent);
+        avlNode* right_child = to_avl(root->right);
+        avlNode* right_child_left = to_avl(right_child->left);
 
-            int balik = balance(bal);
-            std::cout << bal->data.key << ':' << balik << "\n";
+        right_child->left = root;
+        root->right = right_child_left;
+        
+        if (right_child_left) right_child_left->parent = root;
+        root->parent = right_child;
+        right_child->parent = parent;
+        
+        if (parent != nullptr) {
+            if (parent->left == root) parent->left = right_child;
+            else parent->right = right_child;
+        }
+        
+        updateHeight(root);
+        updateHeight(right_child);
+        
+        if (right_child->parent == nullptr) head = right_child;
+        
+        return right_child;
+    }
+    
+    avlNode* LR(avlNode *root){
+        if (root == nullptr || root->left == nullptr) return root;
+        root->left = RR(to_avl(root->left));
+        return LL(root);
+    }
+    
+    avlNode* RL(avlNode *root){
+        if (root == nullptr || root->right == nullptr) return root;
+        root->right = LL(to_avl(root->right));
+        return RR(root);
+    }
+    
+    void rebalance(avlNode *node){ 
+        if (node == nullptr) return;
+        
+        avlNode* current = node;
+        
+        while (current != nullptr) {
+            updateHeight(current);
+            int bal = balance(current);
+            
+            if (bal == -2) {
+                if (balance(to_avl(current->left)) == 1) {
+                    current = LR(current);
+                } else {
+                    current = LL(current);
+                }
+            }
+            else if (bal == 2) {
+                if (balance(to_avl(current->right)) == -1) {
+                    current = RL(current);
+                } else {
+                    current = RR(current);
+                }
+            }
+            else {
+                current = to_avl(current->parent);
+            }
+        }
+    }
 
-        if (balik == -2){ 
-            if (balance(static_cast<avlNode*>(bal->left)) == 1){ 
-                //LR 
-                std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl; 
-                bal = LR(bal); 
-                bal = static_cast<avlNode*>(bal->parent); 
-            }
-            else if (balance(static_cast<avlNode*>(bal->left)) == -1){ 
-                //LL
-                bal = LL(bal);
-                bal = static_cast<avlNode*>(bal->parent); 
-            }
-        }
-        else if (balik == 2){ 
-            if(balance(static_cast<avlNode*>(bal->right)) == 1){ 
-                // RR
-                bal = RR(bal); 
-                bal = static_cast<avlNode*>(bal->parent); 
-            } 
-            else if (balance(static_cast<avlNode*>(bal->right)) == -1){ 
-                // RL
-                bal = RL(bal);
-                bal = static_cast<avlNode*>(bal->parent); 
-            }
-        }
-        else{
-            updateHeight(bal); 
-            bal = static_cast<avlNode*>(bal->parent); 
-        }
-    }}
 public:
     avltree() : Tree<Tkey, Tval>(), head(nullptr) {}; 
-    avltree(avlNode *h){
-        head = h; 
-        head->parent = nullptr; 
+    
+    avltree(avlNode *h) : Tree<Tkey, Tval>(), head(h) {
+        if (head) head->parent = nullptr; 
     } 
 
-    void _insert(const Tkey&k, const Tval&v){ 
-         if (head == nullptr){ 
+    void insert(const Tkey &k, const Tval &v) override { 
+        if (head == nullptr){ 
             head = new avlNode(k, v, nullptr, nullptr, nullptr, 1); 
+            this->n = 1;
             return; 
         }
 
@@ -276,79 +156,186 @@ public:
 
         while(tmp != nullptr){ 
             prev = tmp; 
-            if (k < tmp->data.key)
-        {   
-            tmp = static_cast<avlNode*>(tmp->left);
+            if (k < tmp->data.key){   
+                tmp = to_avl(tmp->left);
+            }
+            else if (k > tmp->data.key){
+                tmp = to_avl(tmp->right);
+            }
+            else{
+                throw std::runtime_error("key is not unique");
+            }
         }
-        else if (k > tmp->data.key)
-        {
-            tmp = static_cast<avlNode*>(tmp->right);
-        }
-        else
-        {
-            throw std::runtime_error("key is not unique");
-        }
-        }
+        
         avlNode *newNode = new avlNode(k, v, nullptr, nullptr, prev, 1);
+        this->n++;
 
-    if (k < prev->data.key)
-    {
-        prev->left = newNode;
+        if (k < prev->data.key){
+            prev->left = newNode;
+        }
+        else{
+            prev->right = newNode;
+        }
 
+        rebalance(newNode);
     }
-    else
-    {
-        prev->right = newNode;
+    
+    void remove(const Tkey &k) override {
+    if (head == nullptr) {
+        throw std::runtime_error("tree is empty");
+    }
+    
+    avlNode* toDelete = head;
+    while (toDelete != nullptr && toDelete->data.key != k) {
+        if (k < toDelete->data.key) {
+            toDelete = to_avl(toDelete->left);
+        } else {
+            toDelete = to_avl(toDelete->right);
+        }
+    }
+    
+    if (toDelete == nullptr) {
+        throw std::runtime_error("key not found");
+    }
+    
+    avlNode* parent = to_avl(toDelete->parent);
+    avlNode* startRebalance = parent;
+    
+    // list
+    if (toDelete->left == nullptr && toDelete->right == nullptr) {
+        if (parent == nullptr) {
+            head = nullptr;
+        } else if (parent->left == toDelete) {
+            parent->left = nullptr;
+        } else {
+            parent->right = nullptr;
+        }
+        delete toDelete;
+        this->n--;
+    }
+    //1 child 
+    else if (toDelete->left == nullptr) {
+        avlNode* child = to_avl(toDelete->right);
+        if (parent == nullptr) {
+            head = child;
+            child->parent = nullptr;
+        } else if (parent->left == toDelete) {
+            parent->left = child;
+            child->parent = parent;
+        } else {
+            parent->right = child;
+            child->parent = parent;
+        }
+        delete toDelete;
+        this->n--;
+    }
+    else if (toDelete->right == nullptr) {
+        avlNode* child = to_avl(toDelete->left);
+        if (parent == nullptr) {
+            head = child;
+            child->parent = nullptr;
+        } else if (parent->left == toDelete) {
+            parent->left = child;
+            child->parent = parent;
+        } else {
+            parent->right = child;
+            child->parent = parent;
+        }
+        delete toDelete;
+        this->n--;
+    }
+    // 2 child 
+    else {
+        avlNode* minRight = to_avl(toDelete->right);
+        while (minRight->left != nullptr) {
+            minRight = to_avl(minRight->left);
+        }
+        
+        Tkey minKey = minRight->data.key;
+        Tval minVal = minRight->data.val;
+        
+        avlNode* minParent = to_avl(minRight->parent);
+        startRebalance = minParent;
+        
+        if (minRight->right == nullptr) {
+            if (minParent->left == minRight) {
+                minParent->left = nullptr;
+            } else {
+                minParent->right = nullptr;
+            }
+        } else {
+            // у minRight есть правый ребенок
+            avlNode* child = to_avl(minRight->right);
+            if (minParent->left == minRight) {
+                minParent->left = child;
+                child->parent = minParent;
+            } else {
+                minParent->right = child;
+                child->parent = minParent;
+            }
+        }
+        delete minRight;
+        this->n--;
+        
+        Tkey tempKey = toDelete->data.key;
+        Tval tempVal = toDelete->data.val;
+        
+        toDelete->data.key = minKey;
+        toDelete->data.val = minVal;
+        
+        if (startRebalance != nullptr) {
+            rebalance(startRebalance);
+        }
+        return;
+    }
+    
+    if (startRebalance != nullptr) {
+        rebalance(startRebalance);
+    }
+}
+
+    bool search(const Tkey &k) override {
+        return findNodeByKeyAvl(k) != nullptr;
     }
 
-    rebalance(newNode); 
+    Tval search_elem(const Tkey &k) override {
+        avlNode* node = findNodeByKeyAvl(k);
+        if (node == nullptr) {
+            throw std::runtime_error("cant find ur elem");
+        }
+        return node->data.val;
     }
 
-    void insert(const Tkey &k, const Tval &v) override 
-    { 
-        _insert(k, v);
-    }
-    void remove(size_t pos) override {};
-    void remove(const Tkey &k) override {};
-
-
-    //~~~SEARCH~~~ 
-    bool search(const Tkey &k) override
-    {
-        return true; // chtob ne otkisalo pri complire
-    };
-    Tval search_elem(const Tkey &k) override {};
-
-
-    //~~~~PRINT~~~~
-    void printAvlTree()
-    {
+    void printAvlTree() {
         this->printTree(this->head, "HEAD: ");
     }
-    void printAvlTreeWithKey()
-    {
+    
+    void printAvlTreeWithKey() {
         this->printTreeWithKey(this->head);
     }
 
-
-    //~~OTHER~~~
-    avlNode *findNodebyPosition(size_t pos)
-    {
-        //upcast - mozhno ne castit' 
-        //downcast - libo static_cast libo dynamic_cast 
-        //
+    avlNode* findNodeByPosition(size_t pos) {
         return static_cast<avlNode*>(this->findNodeByPos(pos));
     }
-    avlNode *findNodebyPosition(avlNode root, size_t pos, size_t target_pos)
-    {
-        return static_cast<avlNode*>(this->findNodeByPos(root, pos, target_pos));
+    
+    avlNode* findNodeByKeyAvl(const Tkey &k) {
+        avlNode* tmp = head;
+    while (tmp != nullptr) {
+        if (tmp->data.key == k) return tmp;
+        else if (k < tmp->data.key) tmp = to_avl(tmp->left);
+        else tmp = to_avl(tmp->right);
     }
-    avlNode* findNodeByKeyAvl(const Tkey &k)
-    {
-        return static_cast<avlNode*>(this->findNodeByKey(k));
+    return nullptr;
     }
-
-
+    
+    size_t size() const {
+        return this->n;
+    }
+    void clear() {
+    this->deleteSubTree(this->head);
+    head = nullptr;
+    this->n = 0;
+}
 };
 
 #endif

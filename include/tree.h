@@ -21,11 +21,11 @@ protected:
         Node(const pair &a, Node *l, Node *r, Node *p) : data(a), left(l), right(r), parent(p) {}
         virtual ~Node() = default; 
     };
-
+    size_t n;
 
 private:
     Node *head;
-        size_t n;
+    
 
 public:
     Node *GetHead() { return head; }
