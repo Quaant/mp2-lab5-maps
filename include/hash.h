@@ -1,218 +1,174 @@
-#include <iostream>
-#include <functional> 
+#ifndef HASH_H
+#define HASH_H
+
+#include <cstddef>
+#include <functional>
 #include <random>
+#include <stdexcept>
+#include <utility>
+#include <vector>
 
-using namespace std; 
+template <typename K, typename V>
+class CockooHashTable {
+private:
+    static constexpr size_t kMul = 0x9e3779b97f4a7c15ULL;
+    static constexpr double kMaxLoad = 0.48;
+    static constexpr size_t kMaxKick = 128;
 
-
-template <typename k, typename v>
-class CockooHashTable{ 
-    private: 
-    static constexpr size_t S1 = 0x9e3779b97f4a7c15; 
-    size_t seed1, seed2; 
-    static constexpr double rehash_const = 0.5; 
-
-    size_t max_iteration = 128; 
-
-    struct bucket {
-        k key; 
-        v value;  
-        bool occupied; 
-        bucket() : occupied(false) {}
-        bucket(k& a, v& b){
-            key = a; 
-            value = b; 
-            occupied = true; 
-        }
-    }
-    vector<bucket> table;
-    size_t half_capacity = 16; 
-    size_t num_elem = 0; 
-   
-    double load_factor(){ 
-        return static_cast<double>(num_elem / table.size());
-    }
-
-    bool need_rehash(){ 
-        if (load_factor() > rehash_const){ 
-            return true;
-        }
-        return false; 
-    }
-
-    size_t half_size() {
-        return table.size() / 2;
-    }
-
-    int h1(const &k key, size_t hs, size_t s1){ 
-        size_t h = hash<k>{}(key); // вот тут {} потому что hash это не функция а тип 
-        h ^= s1; 
-        h ^= h >> 17;
-        h *= S1; 
-        return h % hs; 
-    }
-
-    int h2(const &k key, size_t hs, size_t s2){
-        size_t h = hash<k>{}(key); 
-        h ^= s2;
-        h ^= h >> 17; 
-        h *= S1; 
-        return hs + (h % hs);  // half_size .. table.size()-1
-
-    }
-    bool insert_into_table(vector<bucket>& ntable, size_t half, size_t s1, size_t s2, const k& key, const &v, val){ 
-        k current_key = key; 
-        v current_val = val; 
-        size_t index = h1(current_key, half, s1);
-        
-        for (size_t i = 0; i < max_iteration; i++){ 
-            if (!ntable[index].occupied){
-                tbl[index] = bucket(current_key, current_value);
-                return true; 
-            }
-            else if( ntable[index].key == current_key){
-                ntable[index].val = current_val; 
-                return true; 
-            } 
-
-            swap(current_key, ntable[index].key); 
-            swap(current_val, ntable[index].val); 
-
-            if (index < half){
-                index = h2(current_key, half, s2);
-            }
-            else{
-                index = h1(current_key, half, s1); 
-            }
-
-            }
-            return false;
-        }
-    
-    void rehash(){
-        //algoritm: 
-        //make resize and reseed h1 and h2; try to push all elements(insert_into_table) from old table 
-        //if we can't push all, again make resize while we cannot push all 
-        // when we push, we swap all variables
-        size_t new_hc = half_capacity * 2; 
-        vector <bucket> new_table(new_hc * 2); 
-         
-
-        random_device rd;
-        
-        
-        size_t new_seed1 = rd(); 
-        size_t new_seed2 = rd(); 
-
-        size_t new_count = 0; 
-        bool flag = true; 
-        for (auto i : table){ 
-            if (i.occupied){ 
-                if (!insert_into_table(new_table, new_hc, new_seed1, new_seed2, i.key, i.val)){
-                    flag = false; 
-                    break; 
-                }
-            new_count++; 
-            }
-        }
-        while (!flag){ 
-            new_hc *= 2; 
-            new_table.clear(); 
-            new_table.resize(new_hc * 2); 
-
-            random_device rd2;
-
-            new_seed1 = rd2(); 
-            new_seed2 = rd2(); 
-
-            new_count = 0; 
-            all_inserted = true; 
-
-            for (auto i : table){ 
-            if (i.occupied){ 
-                if (!insert_into_table(new_table, new_hc, new_seed1, new_seed2, i.key, i.val)){
-                    flag = false; 
-                    break; 
-                }
-            new_count++; 
-            }
-        }
-        }
-        table = move(new_table); 
-        seed1 = new_seed1; 
-        seed2 = new_seed2; 
-        num_elements = new_count; 
-    }
-
-    
-
-    public:
-
-    CockooHastTable(){ 
-        random_device rd; 
-        seed1 = rd(); 
-        seed2 = rd(); 
-        table(half_capacity * 2); 
-    }
-    void insert(const k& key, const v& val){
-        if (need_resash()){ 
-            rehash(); 
-        }
-        size_t pos1 = h1(key);
-        size_t pos2 = h2(key);
-
-        if (table[pos1].occupied && table[pos1].key == key) {
-            table[pos1].value = value;
-            return;
-        }
-        if (table[pos2].occupied && table[pos2].key == key) {
-            table[pos2].value = value;
-            return;
-        }
-        
-        if (!insert_into_table(table, half_size(), seed1, seed2, key, value)) {
-            rehash();
-            insert_into_table(table, half_size(), seed1, seed2, key, value);
-        }
-        
-        ++num_elements;
-    }
-
-
-    void remove(const k& key){
-        if (Find(key) == nullptr){ 
-            throw("can't find element in massive")
-        }
-        size_t pos1 = h1(key);
-        if (table[pos1].occupied && table[pos1].key == key) {
-            table[pos1].occupied = false;
-            --num_elements;
-            return;
-        }
-        
-        size_t pos2 = h2(key);
-        if (table[pos2].occupied && table[pos2].key == key) {
-            table[pos2].occupied = false;
-            --num_elements;
-            return;
-        }
-        
-        return;
+    struct Bucket {
+        K key{};
+        V value{};
+        bool occupied = false;
     };
-    
-    
-    v* Find(const k& key){
-        size_t pos1 = h1(key); 
-        if (table[pos1].occupied && table[pos1].key == key) {
-            return &table[pos1].value;
-        }
-        
-        size_t pos2 = h2(key);
-        if (table[pos2].occupied && table[pos2].key == key) {
-            return &table[pos2].value;
-        }
-        
-        return nullptr;
-    }; 
 
-}
+    std::vector<Bucket> table_;
+    size_t half_ = 16;
+    size_t num_elem_ = 0;
+    size_t seed1_ = 0;
+    size_t seed2_ = 0;
+
+    size_t mix(size_t h) const {
+        h ^= h >> 17;
+        h *= kMul;
+        return h;
+    }
+
+    size_t index1(const K& key) const {
+        size_t h = std::hash<K>{}(key);
+        h ^= seed1_;
+        h = mix(h);
+        return h % half_;
+    }
+
+    size_t index2(const K& key) const {
+        size_t h = std::hash<K>{}(key);
+        h ^= seed2_;
+        h = mix(h);
+        return half_ + (h % half_);
+    }
+
+    double load_factor() const {
+        if (table_.empty()) {
+            return 0.0;
+        }
+        return static_cast<double>(num_elem_) / static_cast<double>(table_.size());
+    }
+
+    bool need_rehash() const { return load_factor() > kMaxLoad; }
+
+    bool insert_no_rehash(const K& key, const V& val) {
+        K cur_k = key;
+        V cur_v = val;
+        size_t idx = index1(cur_k);
+
+        for (size_t iter = 0; iter < kMaxKick; ++iter) {
+            if (!table_[idx].occupied) {
+                table_[idx].key = cur_k;
+                table_[idx].value = cur_v;
+                table_[idx].occupied = true;
+                ++num_elem_;
+                return true;
+            }
+            if (table_[idx].key == cur_k) {
+                table_[idx].value = cur_v;
+                return true;
+            }
+            std::swap(cur_k, table_[idx].key);
+            std::swap(cur_v, table_[idx].value);
+            const size_t i1 = index1(cur_k);
+            const size_t i2 = index2(cur_k);
+            idx = (idx == i1) ? i2 : i1;
+        }
+        return false;
+    }
+
+    void grow_and_reseed() {
+        std::vector<std::pair<K, V>> items;
+        items.reserve(num_elem_);
+        for (const Bucket& b : table_) {
+            if (b.occupied) {
+                items.emplace_back(b.key, b.value);
+            }
+        }
+
+        std::random_device rd;
+        for (;;) {
+            half_ *= 2;
+            table_.assign(2 * half_, Bucket{});
+            num_elem_ = 0;
+            seed1_ = (static_cast<size_t>(rd()) << 32) ^ static_cast<size_t>(rd());
+            seed2_ = (static_cast<size_t>(rd()) << 32) ^ static_cast<size_t>(rd());
+            if (seed1_ == seed2_) {
+                ++seed2_;
+            }
+
+            bool ok = true;
+            for (const auto& kv : items) {
+                if (!insert_no_rehash(kv.first, kv.second)) {
+                    ok = false;
+                    break;
+                }
+            }
+            if (ok) {
+                return;
+            }
+        }
+    }
+
+public:
+    CockooHashTable() {
+        std::random_device rd;
+        seed1_ = (static_cast<size_t>(rd()) << 32) ^ static_cast<size_t>(rd());
+        seed2_ = (static_cast<size_t>(rd()) << 32) ^ static_cast<size_t>(rd());
+        if (seed1_ == seed2_) {
+            ++seed2_;
+        }
+        table_.assign(2 * half_, Bucket{});
+    }
+
+    void insert(const K& key, const V& val) {
+        if (V* p = Find(key)) {
+            *p = val;
+            return;
+        }
+        for (;;) {
+            while (need_rehash()) {
+                grow_and_reseed();
+            }
+            if (insert_no_rehash(key, val)) {
+                return;
+            }
+            grow_and_reseed();
+        }
+    }
+
+    void remove(const K& key) {
+        const size_t i1 = index1(key);
+        if (table_[i1].occupied && table_[i1].key == key) {
+            table_[i1].occupied = false;
+            --num_elem_;
+            return;
+        }
+        const size_t i2 = index2(key);
+        if (table_[i2].occupied && table_[i2].key == key) {
+            table_[i2].occupied = false;
+            --num_elem_;
+            return;
+        }
+        throw std::runtime_error("remove: key not found");
+    }
+
+    V* Find(const K& key) {
+        const size_t i1 = index1(key);
+        if (table_[i1].occupied && table_[i1].key == key) {
+            return &table_[i1].value;
+        }
+        const size_t i2 = index2(key);
+        if (table_[i2].occupied && table_[i2].key == key) {
+            return &table_[i2].value;
+        }
+        return nullptr;
+    }
+};
+
+#endif

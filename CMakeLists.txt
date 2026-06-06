@@ -6,7 +6,5 @@ add_subdirectory("googletest")
 add_subdirectory("src")
 add_subdirectory("test")
 
-
-
 #cmake .. 
 #cmake --build . 
